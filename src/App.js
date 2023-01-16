@@ -1,4 +1,5 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
+import gamme from './gamme.json';
 
 import logo from './logo.svg';
 import image from './Présentation1.jpg';
@@ -6,11 +7,15 @@ import imageH from './31205-HARLEY.jpg';
 
 //import colorList from './gamme.json';
 const colorList = [[4, 19, 28], [0, 84, 190], [247, 186, 59], [200, 25, 8], [145, 156, 119]]
+//const [closestColor, setClosestColor] = useState([250, 5, 5]);
 
 const MyComponent = () => {
+  const gammeEntries = Object.entries(gamme);
+  console.log(gammeEntries);
+
   const canvasRef = useRef(null);
-  const x = 700;
-  const y = 5;
+  const x = 500;
+  const y = 300;
 
   const img = new Image();
   img.src = image;
@@ -41,21 +46,21 @@ const MyComponent = () => {
 
     const index = (y * img.width + x) * 4;
     const selectedPixelColor = [pixelData[index], pixelData[index + 1], pixelData[index + 2]];
-    //console.log(`R: ${pixelData[index]}, G: ${pixelData[index + 1]}, B: ${pixelData[index + 2]}, A: ${pixelData[index + 3]}`);
     console.log(selectedPixelColor);
+    //console.log(`R: ${pixelData[index]}, G: ${pixelData[index + 1]}, B: ${pixelData[index + 2]}, A: ${pixelData[index + 3]}`);
 
-    findClosestColor(selectedPixelColor, colorList)
-
+    //setClosestColor(findClosestColor(selectedPixelColor, colorList))
+    findClosestColor(selectedPixelColor, gammeEntries)
   };
 
   //const [targetRGB, setTargetRGB] = useState([250, 5, 5]);
   //const [closestColor, setClosestColor] = useState(null);
-  var closestColor = colorList[0];
 
   function findClosestColor(rgb, colorList) {
+    var closestColor = colorList[0][1];
     var closestDistance = Number.MAX_SAFE_INTEGER;
     for (var i = 0; i < colorList.length; i++) {
-      var distance = calculateColorDistance(rgb, colorList[i]);
+      var distance = calculateColorDistance(rgb, colorList[i][1]);
       if (distance < closestDistance) {
         closestColor = colorList[i];
         closestDistance = distance;
@@ -79,7 +84,6 @@ const MyComponent = () => {
   return (
     <div>
       <div><canvas ref={canvasRef} /></div>
-      <div style={{ backgroundColor: "rgb(" + closestColor[0] + ", " + closestColor[1] + ", " + closestColor[2] + ")" }} >TEST</div>
     </div>
   );
 
