@@ -10,11 +10,13 @@ const MainComponent = () => {
   console.log(gammeEntries);
 
   const canvasRef = useRef(null);
-  const x = 500;
-  const y = 300;
+  const canvasLego = useRef(null);
+  // Permet de pointer un pixel en particulier selon ses coordonnées
+  //const x = 500;
+  //const y = 300;
 
   const img = new Image();
-  img.src = image;
+  img.src = imageH;
   //console.log(img);
 
   useEffect(() => {
@@ -37,14 +39,46 @@ const MainComponent = () => {
     const imageData = ctx.getImageData(0, 0, img.width, img.height);
     const pixelData = imageData.data;
     // pixelData est un tableau de 4 valeurs (r, g, b, a) pour chaque pixel de l'image
-    // console.log(pixelData);
+    //console.log(pixelData);
+    console.log(pixelData.length / 4);
 
-    const index = (y * img.width + x) * 4;
-    const selectedPixelColor = [pixelData[index], pixelData[index + 1], pixelData[index + 2]];
-    console.log(selectedPixelColor);
-    //console.log(`R: ${pixelData[index]}, G: ${pixelData[index + 1]}, B: ${pixelData[index + 2]}, A: ${pixelData[index + 3]}`);
+    // Définition du canvas de l'image transformée
+    const canvasTarget = canvasLego.current;
+    canvasTarget.width = img.naturalWidth;
+    canvasTarget.height = img.naturalHeight;
 
-    findClosestColor(selectedPixelColor, gammeEntries)
+    const ctxTarget = canvasTarget.getContext('2d');
+    const imageDataTarget = ctxTarget.getImageData(0, 0, img.width, img.height);
+    const pixelDataTarget = imageDataTarget.data;
+
+
+    const cache = new Map();
+    // Permet de pointer un pixel en particulier selon ses coordonnées
+    //const index = (y * img.width + x) * 4;
+    // Ici on prend tous les pixels de l'image
+    for (var index = 0; index < pixelData.length / 4; index++) {
+      const selectedPixelColor = [pixelData[index * 4], pixelData[index * 4 + 1], pixelData[index * 4 + 2]];
+      //console.log(selectedPixelColor);
+      //console.log(`R: ${pixelData[index]}, G: ${pixelData[index + 1]}, B: ${pixelData[index + 2]}, A: ${pixelData[index + 3]}`);
+
+      if (selectedPixelColor) {
+        let closestColor = cache.get(JSON.stringify(selectedPixelColor));
+        if (!closestColor) {
+          closestColor = findClosestColor(selectedPixelColor, gammeEntries);
+          cache.set(JSON.stringify(selectedPixelColor), closestColor);
+        } else {
+          closestColor = cache.get(JSON.stringify(selectedPixelColor));
+        }
+        //console.log(closestColor);
+        pixelDataTarget[index * 4] = closestColor[1][0];
+        pixelDataTarget[index * 4 + 1] = closestColor[1][1];
+        pixelDataTarget[index * 4 + 2] = closestColor[1][2];
+        pixelDataTarget[index * 4 + 3] = closestColor[1][3];
+      }
+
+    }
+    console.log(`Cache size: ${cache.size}`);
+    ctxTarget.putImageData(imageDataTarget, 0, 0)
   };
 
   function findClosestColor(rgb, colorList) {
@@ -57,7 +91,7 @@ const MainComponent = () => {
         closestDistance = distance;
       }
     }
-    console.log(closestColor);
+
     return closestColor;
   }
 
@@ -74,6 +108,8 @@ const MainComponent = () => {
   return (
     <div>
       <div><canvas ref={canvasRef} /></div>
+      <div></div>
+      <div><canvas ref={canvasLego} /></div>
     </div>
   );
 
