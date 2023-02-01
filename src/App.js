@@ -1,15 +1,11 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect } from 'react';
 import gamme from './gamme.json';
 
 import logo from './logo.svg';
 import image from './Présentation1.jpg';
 import imageH from './31205-HARLEY.jpg';
 
-//import colorList from './gamme.json';
-const colorList = [[4, 19, 28], [0, 84, 190], [247, 186, 59], [200, 25, 8], [145, 156, 119]]
-//const [closestColor, setClosestColor] = useState([250, 5, 5]);
-
-const MyComponent = () => {
+const MainComponent = () => {
   const gammeEntries = Object.entries(gamme);
   console.log(gammeEntries);
 
@@ -23,10 +19,9 @@ const MyComponent = () => {
 
   useEffect(() => {
     img.onload = () => {
-      console.log('Width - ' + img.width)
-      console.log('Height - ' + img.height)
-
       handleImageLoaded();
+      //console.log('Width - ' + img.width)
+      //console.log('Height - ' + img.height)
     };
   }, []);
 
@@ -49,12 +44,8 @@ const MyComponent = () => {
     console.log(selectedPixelColor);
     //console.log(`R: ${pixelData[index]}, G: ${pixelData[index + 1]}, B: ${pixelData[index + 2]}, A: ${pixelData[index + 3]}`);
 
-    //setClosestColor(findClosestColor(selectedPixelColor, colorList))
     findClosestColor(selectedPixelColor, gammeEntries)
   };
-
-  //const [targetRGB, setTargetRGB] = useState([250, 5, 5]);
-  //const [closestColor, setClosestColor] = useState(null);
 
   function findClosestColor(rgb, colorList) {
     var closestColor = colorList[0][1];
@@ -80,7 +71,6 @@ const MyComponent = () => {
     return Math.sqrt((((512 + rMean) * r * r) >> 8) + 4 * g * g + (((767 - rMean) * b * b) >> 8));
   }
 
-  //return <canvas ref={canvasRef} />;
   return (
     <div>
       <div><canvas ref={canvasRef} /></div>
@@ -89,4 +79,4 @@ const MyComponent = () => {
 
 };
 
-export default MyComponent;
+export default MainComponent;
