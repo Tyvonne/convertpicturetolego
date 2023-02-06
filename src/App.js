@@ -17,7 +17,7 @@ const MainComponent = () => {
   //const y = 300;
 
   const img = new Image();
-  img.src = imageVG;
+  img.src = imageH;
   //console.log(img);
 
   useEffect(() => {
