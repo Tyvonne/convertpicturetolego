@@ -4,6 +4,7 @@ import gamme from './gamme.json';
 import logo from './logo.svg';
 import image from './Présentation1.jpg';
 import imageH from './31205-HARLEY.jpg';
+import imageVG from './VanGogh.png';
 
 const MainComponent = () => {
   const gammeEntries = Object.entries(gamme);
@@ -16,7 +17,7 @@ const MainComponent = () => {
   //const y = 300;
 
   const img = new Image();
-  img.src = imageH;
+  img.src = imageVG;
   //console.log(img);
 
   useEffect(() => {
