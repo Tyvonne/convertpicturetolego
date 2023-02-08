@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import gamme from './gamme.json';
 
 import AppBar from '@mui/material/AppBar';
@@ -20,9 +20,16 @@ import Switch from '@mui/material/Switch';
 
 
 function App() {
+  const canvasRef = useRef(null);
   const [src, setSrc] = useState("");
   const [fileName, setFileName] = useState("");
-  //const [scaleValue, setScaleValue] = useState();
+  const [pixelType, setPixelType] = useState("pixels");
+  const [image, setImage] = useState(null);
+  const [scaleValue, setScaleValue] = useState(1);
+  const [imageWidth, setImageWidth] = useState(0);
+  const [imageHeight, setImageHeight] = useState(0);
+  const [imageSize, setImageSize] = useState(0);
+  const [checked, setChecked] = React.useState(false);
 
   const gammeEntries = Object.entries(gamme);
 
@@ -31,11 +38,47 @@ function App() {
     setFileName(event.target.files[0].name);
   };
 
-  const handleScaleChange = (event) => {
-    //setScaleValue(event.value);
+  useEffect(() => {
+    const image = new Image();
+    image.src = src;
+    image.onload = () => {
+      setImage(image);
+    };
+  }, [src]);
+  useEffect(() => {
+    if (!image) {
+      return;
+    }
+    const canvas = canvasRef.current;
+    const context = canvas.getContext('2d');
+    canvas.width = image.width;
+    canvas.height = image.height;
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    const smallCanvas = document.createElement('canvas');
+    const smallContext = smallCanvas.getContext('2d');
+    smallCanvas.width = canvas.width / scaleValue;
+    smallCanvas.height = canvas.height / scaleValue;
+    smallContext.drawImage(canvas, 0, 0, smallCanvas.width, smallCanvas.height);
+
+    context.imageSmoothingEnabled = false;
+    context.drawImage(smallCanvas, 0, 0, canvas.width, canvas.height);
+    setImageHeight(smallCanvas.height);
+    setImageWidth(smallCanvas.width);
+    setImageSize(smallCanvas.height * smallCanvas.width);
+
+  }, [image, scaleValue]);
+
+  const handleScaleChange = (event, newValue) => {
+    setScaleValue(newValue);
   };
 
-  const label = { inputProps: { 'aria-label': 'Switch to Lego' } };
+  const switchChange = (event) => {
+    setChecked(event.target.checked);
+    if (!checked) {
+      setPixelType("Lego bricks")
+    } else { setPixelType("pixels") }
+  };
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -57,13 +100,13 @@ function App() {
       </AppBar>
 
       <Box sx={{ display: "flex", flexDirection: "row", flexGrow: 1, padding: "16px" }}>
-        <Box sx={{ flexBasis: "70%" }}>
+        <Box sx={{ flexBasis: "40%" }}>
           <Typography id="input-slider" sx={{ minWidth: "120px" }}>
             Picture scale
           </Typography>
           <Slider
             aria-label="Scale"
-            defaultValue={1}
+            value={scaleValue}
             valueLabelDisplay="auto"
             onChange={handleScaleChange}
             step={1}
@@ -75,10 +118,23 @@ function App() {
         </Box>
 
         <Box sx={{ flexBasis: "30%" }}>
+          <Typography sx={{ minWidth: "120px", paddingLeft: "16px", paddingRight: "16px" }}>
+            Picture size
+          </Typography>
+          <Typography sx={{ minWidth: "120px", paddingLeft: "16px", paddingRight: "16px" }}>
+            Total number of {pixelType} : {imageSize} ({imageWidth} * {imageHeight})
+          </Typography>
+
+        </Box>
+
+        <Box sx={{ flexBasis: "30%" }}>
           <Typography id="input-slider" sx={{ minWidth: "120px", paddingLeft: "16px", paddingRight: "16px" }}>
             Switch to Lego colors
           </Typography>
-          <Switch {...label} />
+          <Switch
+            checked={checked}
+            onChange={switchChange}
+          />
         </Box>
       </Box>
 
@@ -107,7 +163,7 @@ function App() {
 
         <Box sx={{ flexBasis: "85%", padding: "16px" }}>
           Picture
-          <Box><img src={src} alt="" /></Box>
+          <Box><canvas ref={canvasRef} /></Box>
         </Box>
       </Box>
 
